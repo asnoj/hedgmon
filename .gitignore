@@ -1,0 +1,27 @@
+# Build artifacts
+obj/
+*.o
+*.out
+hedgemon
+
+# Debug symbols
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Core dumps (generated when a program crashes)
+core
+core.*
+vgcore.*
