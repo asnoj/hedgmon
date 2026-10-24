@@ -1,18 +1,17 @@
 # hedgemon 🦔
 
 ```
-⠀⠀⠀⠀⠀⠀⢠⠠⣆⢆⢶⢴⢄⣦⢊⠴⡘⢆⢤⡞⢢⡤⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⢦⡝⣇⠻⡘⠄⠀⡸⠊⠀⠀⠀⠀⠀⠀⠀⠐⠁⠒⣤⠀⠀⠀⠀⠀
-⠀⠀⠀⢀⣴⡄⠁⡈⠀⡇⡃⡐⠀⠀⠀⠀⢀⡀⠀⠀⠀⠀⣀⠀⠻⣧⣄⡀⠀⠀
-⠀⠀⠀⠀⠙⣿⡌⣉⡀⠀⢠⠁⠀⢀⠄⡠⠏⠀⠀⠂⠁⠁⢀⡀⠀⠀⠸⠿⡀⠀
-⠀⠀⠀⠀⠀⣿⠓⢿⣧⣾⠷⢅⠀⠀⠀⠀⣠⡇⠀⢀⠄⠘⠋⠀⠀⠀⠀⠀⠿⠄
-⠀⠀⠀⢀⠎⠀⠀⠄⠈⠁⢁⣅⠇⢀⣀⣨⠁⠀⡠⠋⠀⢠⠴⢂⡔⢦⡈⣑⢄⠀
-⠀⠀⡠⠊⠀⣶⡄⠀⠀⠀⡚⠋⠛⠿⠭⣤⢖⣋⠀⠀⢀⡀⠄⠑⠂⣀⠀⠀⠛⠅
-⣴⡏⠀⠀⠀⠉⠁⠀⠀⠄⠃⠀⠀⠀⠀⠀⠀⠉⠉⠃⠾⠗⣆⣳⡄⠀⠉⠀⠹⢥
-⠀⠃⠠⠤⠀⠀⠀⠐⠋⠀⠀⡀⢀⠀⠀⠀⠀⠀⠰⣦⠀⠀⢀⠙⠻⠂⣸⣧⡱⡂
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⠑⠰⠆⡀⢠⣐⠀⢀⠀⠀⠀⠂⡄⠁⢀⢀⠾⠉⠀⠉
-⠀⠀⠀⠀⠀⠀⠀⠺⠭⠤⢢⡄⠂⣀⡠⠉⠉⠀⠉⠒⠚⣶⢃⡠⠞⠁⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠤⠤⠤⠤⠤⠤⠄⠀⠤⠤⠤⠄⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠻⠿⠿⠿⠀⠉⠛⠻⢷⠂⠻⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⢀⣤⡶⠟⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠃⠺⣧⡀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⢠⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣆⠀⠀⠀⠀⠀
+⠀⠀⣰⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣿⣷⣀⣴⣾⣿⡄⠀⠀⠀⠀
+⠀⠰⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⡟⠉⠙⢿⣿⣄⠀⠀⠀
+⠀⠀⢸⣇⠀⠀⠀⢀⣀⣀⣀⣀⣀⣀⣀⣠⣤⣴⣿⣿⣿⣿⣶⣴⣿⣿⣿⣃⣀⠀
+⠀⠀⠀⢿⣀⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠃⠀
+⠀⠀⠀⠘⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠉⠉⠁⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ```
 
 un moniteur système en C, fait maison, parce que `htop` existe déjà mais où serait le fun dans ça c:
@@ -29,7 +28,7 @@ tout ça lu directement depuis `/proc`, sans libs externes, juste du C et un peu
 
 ## pourquoi
 
-projet perso pour progresser en C et en système/réseau, avec l'excuse parfaite de se faire un hérisson en ASCII art qui surveille ta bécane depuis son petit cadre en blocs unicode. aucun regret.
+projet perso pour progresser en C et en système/réseau, avec l'excuse parfaite de se faire un hérisson en ASCII art qui surveille ton pc. zero regret.
 
 ## compiler
 
@@ -101,4 +100,4 @@ des trucs qui pourraient arriver si la motivation hérisson reste au rendez-vous
 
 ## état d'esprit
 
-ce projet sert surtout à apprendre proprement : lecture de fichiers système, parsing bas niveau, gestion de process, un peu de réseau, et les bonnes pratiques C qui vont avec (pas de buffer overflow, vérification des retours, découpage en modules). si tu fouilles le code et que tu trouves un truc crade, c'est probablement moi qui apprenais encore ce jour-là :3
+ce projet sert surtout à apprendre proprement : lecture de fichiers système, parsing bas niveau, gestion de process, un peu de réseau, et les bonnes pratiques C qui vont avec (pas de buffer overflow, vérification des retours, découpage en modules). si tu fouilles le code et que tu trouves un truc crade, c IMPOSSIBLE CAR JE ME SUIS APPLIQUER (c possible mais j'ai fais de mon mieux ok?! >;C )
