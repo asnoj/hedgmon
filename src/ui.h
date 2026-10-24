@@ -2,7 +2,7 @@
 #define UI_H
 
 
-#define WINDOW_WIDTH 34
+#define WINDOW_WIDTH 37
 
 // print one line in between ⣿
 // unitile width char (without the border)
