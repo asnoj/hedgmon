@@ -1,11 +1,40 @@
 #include <stdio.h>
+#include <string.h>
 #include "mem.h"
 #include "cpu.h"
 #include "ui.h"
 #include "proc.h"
+#include "net.h"
 #define CLEAR_SCREEN "\033[H\033[J"
 
-static void display_loop(void)
+typedef enum {
+    SORT_RAM,
+    SORT_CPU
+} sort_mode_t;
+
+static sort_mode_t parse_args(int argc, char *argv[])
+{
+    sort_mode_t sort_mode = SORT_RAM; // default
+
+    for (int i = 1; i < argc; i++) 
+    {
+        if (strcmp(argv[i], "--sort") == 0 && i + 1 < argc)
+        {
+            if ((strcmp(argv[i + 1], "cpu")) == 0 || (strcmp(argv[i + 1], "CPU") == 0))
+            {
+                sort_mode = SORT_CPU;
+            } 
+            else if (strcmp(argv[i + 1], "ram") == 0)
+            {
+                sort_mode = SORT_RAM;
+            }
+        }
+    }
+
+    return sort_mode;
+}
+
+static void display_loop(sort_mode_t sort_mode)
 {
     while (1)
     {
@@ -14,26 +43,34 @@ static void display_loop(void)
         mem_info_t mem;
         mem_get_info(&mem);
 
-        double cpu_usage = cpu_get_usage();
-
         process_list_t procs;
-        proc_list_get(&procs);
-        proc_list_sort_by_rss(&procs);
-        
+        proc_list_get(&procs); // get PIDs/names first, before measuring CPU
+
+        double cpu_usage = measure_all_cpu_usage(&procs); // fills cpu_percent for each + returns global
+
+        if (sort_mode == SORT_CPU) 
+            proc_list_sort_by_cpu(&procs);
+        else
+            proc_list_sort_by_rss(&procs);
+
+
+        connection_list_t conns;
+        net_get_tcp_connections(&conns);
+
         char *asciart =
-"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠛⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄⣀⣀⣀⣿⣶⣤⣄⡈⣽⣄⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⢉⣠⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⣼⣅⠘⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⠏⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀⠀⠈⠿⠋⠁⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣏⣠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀⠀⠀⢠⣶⣦⡀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⡇⠸⣿⣿⣿⡿⠿⠿⠿⠿⠿⠿⠿⠟⠛⠋⠀⠀⠀⠀⠉⠋⠀⠀⠀⠼⠿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⣿⡀⠿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣼⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿         ᓬ hedgemon ᕒ          ⣿⣿⣿⣿⣿⣿\n"
-"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n";
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠛⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄⣀⣀⣀⣿⣶⣤⣄⡈⣽⣄⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⢉⣠⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⣼⣅⠘⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀⠀⠈⠿⠋⠁⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣏⣠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀⠀⠀⢠⣶⣦⡀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠸⣿⣿⣿⡿⠿⠿⠿⠿⠿⠿⠿⠟⠛⠋⠀⠀⠀⠀⠉⠋⠀⠀⠀⠼⠿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡀⠿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣼⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿         ᓬ hedgemon ᕒ         ⣿⣿⣿⣿⣿⣿⣿\n"
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n";
     
         printf(CLEAR_SCREEN);
 
@@ -47,15 +84,27 @@ static void display_loop(void)
         mem_print(&mem);
 
 
-        printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
         proc_list_print_top(&procs, 10);
-        printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
+        net_print(&conns);
+        printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n");
         fflush(stdout);
     }
 }
 
-int main(void) {
-    display_loop();
+int main(int argc, char *argv[])
+{
+    sort_mode_t sort_mode = parse_args(argc, argv);
+
+    display_loop(sort_mode);
     return 0;
 }
+
+
+
+
+
+
+
 

@@ -1,6 +1,8 @@
 #ifndef CPU_H
 #define CPU_H
 
+#include "proc.h"
+
 typedef struct {
     unsigned long long total;
     unsigned long long idle;
@@ -12,5 +14,7 @@ int cpu_read_raw(cpu_raw_t *raw);
 
 // call 2 time cpu_read_raw with 1 sec in between
 double cpu_get_usage(void);
+
+double measure_all_cpu_usage(process_list_t *procs);
 
 #endif

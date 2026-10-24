@@ -50,3 +50,51 @@ double cpu_get_usage(void)
     double usage_pct = 100.0 * (double)(delta_total - delta_idle) / (double)delta_total;
     return usage_pct;
 }
+
+#include "proc.h"
+
+// Measures global CPU usage AND per-process CPU usage in a single
+// 1-second window, so we only sleep once instead of once per measurement.
+// Returns the global CPU usage percentage, and fills cpu_percent
+// for every process in procs.
+double measure_all_cpu_usage(process_list_t *procs)
+{
+    cpu_raw_t cpu_before, cpu_after;
+    static unsigned long long proc_before[MAX_PROCESSES];
+    static unsigned long long proc_after[MAX_PROCESSES];
+
+    cpu_read_raw(&cpu_before);
+    for (int i = 0; i < procs->count; i++)
+    {
+        if (proc_read_cpu_raw(procs->list[i].pid, &proc_before[i]) != 0)
+            proc_before[i] = 0; // process gone, will just show 0%
+    }
+
+    sleep(1);
+
+    cpu_read_raw(&cpu_after);
+    for (int i = 0; i < procs->count; i++)
+    {
+        if (proc_read_cpu_raw(procs->list[i].pid, &proc_after[i]) != 0)
+            proc_after[i] = proc_before[i]; // exited: delta will be 0
+    }
+
+    unsigned long long delta_total = cpu_after.total - cpu_before.total;
+    unsigned long long delta_idle = cpu_after.idle - cpu_before.idle;
+
+    double global_usage = 0.0;
+    if (delta_total > 0)
+    {
+        global_usage = 100.0 * (double)(delta_total - delta_idle) / (double)delta_total;
+    }
+
+    for (int i = 0; i < procs->count; i++)
+    {
+        unsigned long long delta_proc = proc_after[i] - proc_before[i];
+        procs->list[i].cpu_percent = (delta_total > 0)
+            ? 100.0 * (double)delta_proc / (double)delta_total
+            : 0.0;
+    }
+
+    return global_usage;
+}

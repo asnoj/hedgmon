@@ -9,6 +9,7 @@ typedef struct {
     char name[PROC_NAME_LEN];
     char state;        // R, S, Z, etc.
     long vmrss_kb;      // physical memory used (RSS)
+    double cpu_percent;
 } process_t;
 
 typedef struct {
@@ -25,5 +26,10 @@ void proc_list_print(const process_list_t *procs);
 
 void proc_list_sort_by_rss(process_list_t *procs);
 void proc_list_print_top(const process_list_t *procs, int top_n);
+
+// Reads utime+stime (in jiffies) for one process from /proc/[pid]/stat.
+// Returns 0 on success, -1 if the process doesn't exist anymore.
+int proc_read_cpu_raw(int pid, unsigned long long *cpu_time);
+void proc_list_sort_by_cpu(process_list_t *procs);
 
 #endif
