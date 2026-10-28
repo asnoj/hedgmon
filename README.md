@@ -12,93 +12,104 @@
 ⠀⠀⠀⢿⣀⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠃⠀
 ⠀⠀⠀⠘⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠉⠉⠁⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-         ᓬ hedgemon ᕒ         
 ```
 
-un moniteur système en C, fait maison, parce que `htop` existe déjà mais où serait le fun dans ça c:
+> A homemade C system monitor, because `htop` already exists but where would the fun be in that c:
 
-## c'est quoi
+---
 
-`hedgemon` tourne direct dans ton terminal et te donne en temps réel :
-- l'usage CPU global de la machine
-- la RAM et le swap utilisés
-- le top des process qui bouffent le plus de ressources (triable par CPU ou RAM)
-- les connexions réseau TCP actives, groupées proprement par état (LISTEN / ESTABLISHED / TIME_WAIT)
+## What is it
 
-tout ça lu directement depuis `/proc`, sans libs externes, juste du C et un peu de patience à parser des fichiers texte du kernel >;]
+`hedgemon` runs straight in your terminal and gives you real-time metrics:
 
-## pourquoi
+- Overall CPU usage of the machine
+- RAM and swap usage
+- Top resource-hungry processes (sortable by CPU or RAM)
+- Active TCP network connections, cleanly grouped by state (`LISTEN` / `ESTABLISHED` / `TIME_WAIT`)
 
-projet perso pour progresser en C et en système/réseau, avec l'excuse parfaite de se faire un hérisson en ASCII art qui surveille ton pc. zero regret.
+Everything is read directly from `/proc`: zero external libraries, just C and a bit of patience parsing kernel text files >;]
 
-## compiler
+## Why
+
+A personal project to level up in C and systems/networking, with the perfect excuse to build an ASCII hedgehog watching over your PC. Zero regrets.
+
+---
+
+## Build
+
+No external dependencies, just `gcc` and standard C. Compiles out of the box on any Linux distro.
 
 ```bash
-make
+make          # build
+make clean    # remove .o files
+make fclean   # remove .o files AND the executable
+make re       # fclean + full rebuild
 ```
 
-et pour tout nettoyer / repartir de zéro :
-
-```bash
-make clean   # vire les .o
-make fclean  # vire les .o ET l'exécutable
-make re      # fclean + rebuild complet
-```
-
-aucune dépendance externe, juste `gcc` et une base de C standard. ça devrait compiler tel quel sur n'importe quelle distro Linux.
-
-## lancer
+## Run
 
 ```bash
 ./hedgemon
 ```
 
-### options
+### Options
 
-| option | valeurs | défaut | effet |
-|---|---|---|---|
-| `--sort` | `cpu` / `ram` | `ram` | trie le top process par CPU ou par RAM |
-| `--top` | un entier | `10` | nombre de process affichés |
+| Option   | Values        | Default | Effect                               |
+|----------|---------------|---------|--------------------------------------|
+| `--sort` | `cpu` / `ram` | `ram`   | Sorts top processes by CPU or RAM    |
+| `--top`  | an integer    | `10`    | Number of processes displayed        |
 
-exemples :
+### Examples
 
 ```bash
 ./hedgemon --sort cpu
 ./hedgemon --sort cpu --top 20
 ```
 
-Ctrl+C pour quitter, comme n'importe quel outil civilisé.
+`Ctrl+C` to quit, like any civilized tool.
 
-## comment ça marche en vrai
+---
 
-pas de lib magique, tout est lu directement dans les fichiers virtuels que le kernel Linux expose :
+## How it actually works
 
-- `/proc/meminfo` → RAM et swap
-- `/proc/stat` → usage CPU global (calculé via un delta entre deux lectures à 1 seconde d'écart)
-- `/proc/[pid]/status` et `/proc/[pid]/stat` → infos et conso CPU de chaque process
-- `/proc/net/tcp` → connexions réseau actives (parsing hexadécimal, le format le moins sympa du lot)
+No magic library. Everything is read directly from virtual files exposed by the Linux kernel:
 
-le code est découpé par responsabilité :
+| File                                  | Used for                                                                 |
+|---------------------------------------|--------------------------------------------------------------------------|
+| `/proc/meminfo`                       | RAM and swap                                                             |
+| `/proc/stat`                          | Overall CPU usage (delta between two reads, 1 second apart)              |
+| `/proc/[pid]/status` and `/proc/[pid]/stat` | Info and CPU consumption per process                               |
+| `/proc/net/tcp`                       | Active network connections (hex parsing, easily the least friendly format of the bunch) |
+
+### Code structure
+
+The codebase is split by responsibility:
 
 ```
 src/
-├── main.c    → boucle principale, parsing des arguments
-├── mem.c/h   → mémoire
-├── cpu.c/h   → CPU global + CPU par process
-├── proc.c/h  → liste des process
-├── net.c/h   → connexions réseau
-└── ui.c/h    → affichage encadré façon fenêtre
+├── main.c    → main loop, argument parsing
+├── mem.c/h   → memory
+├── cpu.c/h   → overall CPU + per-process CPU
+├── proc.c/h  → process list
+├── net.c/h   → network connections
+└── ui.c/h    → window-framed UI display
 ```
 
-## roadmap
+---
 
-des trucs qui pourraient arriver si la motivation hérisson reste au rendez-vous :
+## Roadmap
 
-- [ ] support UDP en plus de TCP
-- [ ] associer chaque connexion réseau à son process (comme `ss -p`)
-- [ ] vraie navigation interactive au clavier (scroll, sélection) plutôt qu'un simple top N
-- [ ] sommer la conso des process enfants (coucou Firefox et ses 15 `Isolated`)
+Things that might land if hedgehog motivation stays strong:
 
-## état d'esprit
+- [ ] UDP support alongside TCP
+- [ ] Map each network connection to its process (like `ss -p`)
+- [ ] Real interactive keyboard navigation (scroll, select) instead of a simple top N
+- [ ] Sum child process consumption (shoutout to Firefox and its 15 isolated processes)
 
-ce projet sert surtout à apprendre proprement : lecture de fichiers système, parsing bas niveau, gestion de process, un peu de réseau, et les bonnes pratiques C qui vont avec (pas de buffer overflow, vérification des retours, découpage en modules). si tu fouilles le code et que tu trouves un truc crade, c IMPOSSIBLE CAR JE ME SUIS APPLIQUER (c possible mais j'ai fais de mon mieux ok?! >;C )
+---
+
+## Mindset
+
+This project is mainly meant for learning properly: reading system files, low-level parsing, process management, a bit of networking, and clean C practices along the way (no buffer overflows, checking return values, modular design).
+
+If you dig into the code and find something messy, **THAT IS IMPOSSIBLE BECAUSE I APPLIED MYSELF** (it's possible, but I did my best ok?! >;C )
